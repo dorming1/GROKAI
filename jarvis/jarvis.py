@@ -10,8 +10,36 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
+import subprocess
 import sys
+
+DEPS_MARKER = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".deps_ok")
+
+
+def ensure_dependencies():
+    """При первом запуске сам ставит недостающие пакеты (pip install)."""
+    if os.path.exists(DEPS_MARKER):
+        return
+    missing = []
+    for module, package in [("speech_recognition", "SpeechRecognition"),
+                            ("pyaudio", "PyAudio"),
+                            ("pyttsx3", "pyttsx3"),
+                            ("anthropic", "anthropic")]:
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(package)
+    if missing:
+        print(f"Первый запуск: устанавливаю {', '.join(missing)} — подождите…")
+        subprocess.call([sys.executable, "-m", "pip", "install", *missing])
+    # помечаем, что попытка была, чтобы не повторять её при каждом старте
+    with open(DEPS_MARKER, "w") as marker:
+        marker.write("ok")
+
+
+ensure_dependencies()
 
 from brain import Brain
 from commands import handle
