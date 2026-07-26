@@ -1,0 +1,76 @@
+# -*- coding: utf-8 -*-
+"""Джарвис — голосовой ассистент для ПК.
+
+Запуск:
+    python jarvis.py            # голосовой режим (нужен микрофон)
+    python jarvis.py --text     # текстовый режим (ввод с клавиатуры)
+    python jarvis.py --no-wake  # реагировать на любую фразу без слова «Джарвис»
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+
+from brain import Brain
+from commands import handle
+from voice import Voice
+
+WAKE_WORD = re.compile(r"^(джарвис|jarvis)[,!.\s]*", re.IGNORECASE)
+EXIT_WORDS = re.compile(r"^(выход|выйди|стоп|пока|отключись|хватит)\b", re.IGNORECASE)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Джарвис — голосовой ассистент для ПК")
+    parser.add_argument("--text", action="store_true",
+                        help="текстовый режим без микрофона и озвучки")
+    parser.add_argument("--no-wake", action="store_true",
+                        help="не требовать слово «Джарвис» перед командой")
+    args = parser.parse_args()
+
+    voice = Voice(voice_enabled=not args.text)
+    brain = Brain()
+
+    def confirm(question: str) -> bool:
+        voice.speak(question)
+        answer = voice.listen() or ""
+        return bool(re.search(r"\b(да|подтверждаю|конечно)\b", answer.lower()))
+
+    voice.speak("Джарвис на связи. Чем могу помочь?")
+    if voice.has_microphone and not args.no_wake:
+        print("Подсказка: начинайте фразу со слова «Джарвис». Для выхода скажите «выход».")
+
+    while True:
+        phrase = voice.listen()
+        if not phrase:
+            continue
+
+        # в голосовом режиме ждём обращения «Джарвис …», в текстовом — нет
+        if voice.has_microphone and not args.no_wake:
+            match = WAKE_WORD.match(phrase)
+            if not match:
+                continue
+            phrase = phrase[match.end():].strip()
+            if not phrase:
+                voice.speak("Слушаю.")
+                phrase = voice.listen() or ""
+                if not phrase:
+                    continue
+
+        if EXIT_WORDS.match(phrase.strip()):
+            voice.speak("До встречи!")
+            break
+
+        response = handle(phrase, voice.speak, confirm)
+        if response is None:
+            response = brain.ask(phrase)
+        voice.speak(response)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nПока!")
+        sys.exit(0)
