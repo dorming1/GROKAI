@@ -17,7 +17,9 @@ from brain import Brain
 from commands import handle
 from voice import Voice
 
-WAKE_WORD = re.compile(r"^(джарвис|jarvis)[,!.\s]*", re.IGNORECASE)
+WAKE_WORD = re.compile(
+    r"^(привет|привіт|здравствуй|хей|эй|окей|ок|hey|ok)?[,!\s]*(джарвис|джарвіс|jarvis)[,!.\s]*",
+    re.IGNORECASE)
 EXIT_WORDS = re.compile(r"^(выход|выйди|стоп|пока|отключись|хватит)\b", re.IGNORECASE)
 
 
@@ -37,7 +39,7 @@ def main():
         answer = voice.listen() or ""
         return bool(re.search(r"\b(да|подтверждаю|конечно)\b", answer.lower()))
 
-    voice.speak("Джарвис на связи. Чем могу помочь?")
+    voice.speak("Джарвис на связи, сэр. Чем могу помочь?")
     if voice.has_microphone and not args.no_wake:
         print("Подсказка: начинайте фразу со слова «Джарвис». Для выхода скажите «выход».")
 
@@ -53,7 +55,7 @@ def main():
                 continue
             phrase = phrase[match.end():].strip()
             if not phrase:
-                voice.speak("Слушаю.")
+                voice.speak("Слушаю, сэр.")
                 phrase = voice.listen() or ""
                 if not phrase:
                     continue

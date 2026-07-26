@@ -13,28 +13,18 @@
 - 📸 «сделай скриншот» — снимок экрана в домашнюю папку
 - ⏲️ «таймер на 5 минут» — напомнит голосом
 - 🔌 «выключи компьютер» — с голосовым подтверждением
+- 💬 Живое общение как в фильме: «Привет, Джарвис!» — «К вашим услугам, сэр.»
 - 🧠 Любой другой вопрос — ответит нейросеть (нужен API-ключ, см. ниже)
 
-## Установка (Windows)
+## Установка на Windows — в два клика
 
 1. Установите [Python 3.10+](https://www.python.org/downloads/) — при установке
    отметьте галочку **Add Python to PATH**.
-2. Откройте командную строку в папке `jarvis` и выполните:
+2. Двойной клик по **`install.bat`** — установит всё нужное (один раз).
+3. Двойной клик по **`start.bat`** — Джарвис запущен. Говорите:
+   «Привет, Джарвис!»
 
-   ```
-   pip install -r requirements.txt
-   ```
-
-   Если `PyAudio` не ставится: `pip install pipwin && pipwin install pyaudio`.
-
-3. Запустите:
-
-   ```
-   python jarvis.py
-   ```
-
-На Linux перед установкой PyAudio: `sudo apt install portaudio19-dev python3-pyaudio espeak`.
-На macOS: `brew install portaudio`.
+На Linux / macOS: `bash install.sh`, затем `python3 jarvis.py`.
 
 ## Как пользоваться
 
